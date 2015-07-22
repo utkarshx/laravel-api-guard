@@ -1,0 +1,31 @@
+{
+    "name": "utkarshx/laravel-api-guard",
+    "description": "Authenticate your api Keys with Laravel",
+    "keywords": [
+        "api",
+        "rest",
+        "json",
+        "api keys",
+        "api authentication",
+        "laravel"
+    ],
+    "homepage": "https://github.com/utkarshx/laravel-api-guard",
+    "authors": [
+        {
+            "name": "Utkarsh Shukla",
+            "email": "utk.shukla@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "illuminate/support": "~5.0",
+        "illuminate/database": "*",
+        "ellipsesynergie/api-response": "0.9.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Utkarshx\\ApiGuard\\": "src"
+        }
+    },
+    "minimum-stability": "stable"
+}
