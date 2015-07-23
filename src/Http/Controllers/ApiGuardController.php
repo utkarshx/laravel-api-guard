@@ -3,6 +3,8 @@
 namespace Utkarshx\ApiGuard\Http\Controllers;
 
 use App;
+
+use Symfony\Component\HttpFoundation\Request;
 use Utkarshx\ApiGuard\Repositories\ApiKeyRepository;
 use Utkarshx\ApiGuard\Repositories\ApiLogRepository;
 use Config;
@@ -28,6 +30,11 @@ class ApiGuardController extends Controller
      */
     public $apiKey = null;
 
+    public $objectMap = null;
+
+    public $objectName = null;
+
+    public $objectModel = null;
 
     /**
      * @var ApiLogRepository
@@ -80,11 +87,17 @@ class ApiGuardController extends Controller
 
             $method = last($routeArray);
 
+
+
             // We should check if key authentication is enabled for this method
             $keyAuthentication = true;
 
             if (isset($apiMethods[$method]['keyAuthentication']) && $apiMethods[$method]['keyAuthentication'] === false) {
                 $keyAuthentication = false;
+            }
+
+            if(isset($apiMethods[$method]['objectName'])) {
+                $this->objectName = $apiMethods[$method]['objectName'];
             }
 
             if ($keyAuthentication === true) {
@@ -103,6 +116,8 @@ class ApiGuardController extends Controller
 
                 $apiKeyModel = App::make(Config::get('apiguard.model', 'Utkarshx\ApiGuard\Models\ApiKey'));
 
+
+
                 if ( ! $apiKeyModel instanceof ApiKeyRepository) {
                     Log::error('[Utkarshx/ApiGuard] You ApiKey model should be an instance of ApiKeyRepository.');
                     $exception = new Exception("You ApiKey model should be an instance of ApiKeyRepository.");
@@ -110,18 +125,40 @@ class ApiGuardController extends Controller
                 }
 
                 $this->apiKey = $apiKeyModel->getByKey($key);
-
                 if (empty($this->apiKey)) {
                     return $this->response->errorUnauthorized();
                 }
+                if(! empty($this->objectName)) {
+                    if($this->objectName == 'class') {
+                        $this->objectModel = App::make(Config::get('apiguard.classModel', 'Utkarshx\ApiGuard\Models\ClassModel'));
+                    } elseif($this->objectName == 'group') {
+                        $this->objectModel = App::make(Config::get('apiguard.groupModel', 'Utkarshx\ApiGuard\Models\GroupModel'));
+                    }
 
-                // API key exists
-                // Check level of API
-                if ( ! empty($apiMethods[$method]['level'])) {
-                    if ($this->apiKey->level < $apiMethods[$method]['level']) {
-                        return $this->response->errorForbidden();
+                    if ( ! $this->objectModel instanceof ApiKeyRepository) {
+                        Log::error('[Utkarshx/ApiGuard] You model should be an instance of ApiKeyRepository.');
+                        $exception = new Exception("You model should be an instance of ApiKeyRepository.");
+                        throw($exception);
+                    }
+                    $urlSegments = $request->segments();
+                    $location = array_search($this->objectName, $urlSegments);
+                    $objectKey = $urlSegments[$location+1];
+
+                    $this->objectMap = $this->objectModel->getByUserIdAndObjectId($this->apiKey->user_id, $objectKey);
+
+                    if (empty($this->objectMap)) {
+                        return $this->response->errorWrongArgs();
+                    }
+                    // API key exists
+                    // Check level of API
+                    if ( ! empty($apiMethods[$method]['level'])) {
+                        if ($this->objectMap->level < $apiMethods[$method]['level']) {
+
+                            return $this->response->errorForbidden();
+                        }
                     }
                 }
+
             }
 
             $apiLog = App::make(Config::get('apiguard.apiLogModel', 'Utkarshx\ApiGuard\Models\ApiLog'));

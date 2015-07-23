@@ -12,17 +12,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 abstract class ApiKeyRepository extends Eloquent
 {
 
-    protected $table = 'api_keys';
+    /*protected $table = 'api_keys';
 
     use SoftDeletes;
 
-    protected $dates = ['deleted_at'];
+    protected $dates = ['deleted_at'];*/
 
     /**
      * @param $key
      * @return ApiKeyRepository
      */
-    public function getByKey($key)
+    /*public function getByKey($key)
     {
         $apiKey = self::where('key', '=', $key)
             ->first();
@@ -32,14 +32,14 @@ abstract class ApiKeyRepository extends Eloquent
         }
 
         return $apiKey;
-    }
+    }*/
 
     /**
      * A sure method to generate a unique API key
      *
      * @return string
      */
-    public function generateKey()
+    /*public function generateKey()
     {
         do {
             $salt = sha1(time() . mt_rand());
@@ -48,7 +48,7 @@ abstract class ApiKeyRepository extends Eloquent
         while (self::keyExists($newKey));
 
         return $newKey;
-    }
+    }*/
 
     /**
      * Checks whether a key exists in the database or not
@@ -56,13 +56,13 @@ abstract class ApiKeyRepository extends Eloquent
      * @param $key
      * @return bool
      */
-    private function keyExists($key)
+    /*private function keyExists($key)
     {
         $apiKeyCount = self::where('key', '=', $key)->limit(1)->count();
 
         if ($apiKeyCount > 0) return true;
 
         return false;
-    }
+    }*/
 
 }

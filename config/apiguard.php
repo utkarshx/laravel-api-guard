@@ -26,6 +26,9 @@ return [
 
     'model'                => 'Utkarshx\ApiGuard\Models\ApiKey',
 
+    'classModel'           => 'Utkarshx\ApiGuard\Models\ClassModel',
+    'groupModel'           => 'Utkarshx\ApiGuard\Models\GroupModel',
+
     /*
     |--------------------------------------------------------------------------
     | ApiLog model
